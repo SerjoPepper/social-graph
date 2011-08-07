@@ -1,3 +1,3 @@
-function starApp () {
+function startApp () {
 	alert(1);
 }
