@@ -5,7 +5,7 @@ VK.init(function(data) {
 VK.api(
     'friends.get',
     {
-        fields: 'uid,first_name,last_name,sex,photo'
+        fields: 'uid,first_name,last_name,sex,photo',
         uid: '31308'
     },
     function (data) {
