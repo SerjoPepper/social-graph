@@ -14,9 +14,8 @@ VK.api(
             var friend = friends[i],
                 p = document.createElement('p');
             
-            p.innerHTML = '
-                <img src="' + friend.photo + '" />
-            ' + [friend.uid, friend.first_name, friend.last_name, friend.sex].join(' ') + '<br />';
+            p.innerHTML = '<img src="' + friend.photo + '" />' + 
+            [friend.uid, friend.first_name, friend.last_name, friend.sex].join(' ') + '<br />';
             document.body.appendChild(p);
         }
     });
