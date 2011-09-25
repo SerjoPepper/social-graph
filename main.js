@@ -50,6 +50,7 @@ GraphRenderer.prototype = {
                     img = new Image();
                 a.href = 'http://vkontakte.ru/id' + node.name;
                 a.title = node.data.name;
+                a.target = 'blank';
                 img.src = node.data.photo;
                 a.appendChild(img);
                 a.className = 'graph-point inited';
