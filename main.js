@@ -215,7 +215,7 @@ App.prototype = {
                                 }
                                 return;
                             }
-                            var edges = _this.parseEncodedRelations(this.response);
+                            var edges = _this.parseEncodedRelations(data.response);
                             _this.addEdges(edges);
                             _this.updateProgress({ increaseBy: increaseBy });
                         }
@@ -261,7 +261,7 @@ App.prototype = {
             increaseBy = 1 / this.uidFriends.length;
         for (var i = 0, k = 0, il = this.uidFriends.length; i < il; i++) {
             (function (i) {
-                var uid = this.uidFriends[i],
+                var uid = _this.uidFriends[i],
                     getFriends = function () {
                     VK.api(
                         'friends.get',
