@@ -65,7 +65,7 @@ GraphRenderer.prototype = {
             if (!_this.drawedEdges[name]) {
                 var line = document.createElement('line');
                 line.className = 'graph-edge inited';
-                setTimeout(function () { line.className = 'graph-point'; }, 1);
+                setTimeout(function () { line.className = 'graph-edge'; }, 1);
                 _this.svgElement.appendChild(line);
                 _this.drawedEdges[name] = line;
             }
