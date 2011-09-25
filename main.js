@@ -124,6 +124,7 @@ function App (elements) {
     this.uidFriends = [];
     this.graph = new Graph(elements);
     this.progress = 0; //loading progress
+    this.view = new View();
 }
 
 App.prototype = {
