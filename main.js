@@ -297,9 +297,9 @@ App.prototype = {
                             }
                         }
                     );
-                    uidsHash[uid] = i;
-                    getFriends();
                 }
+                uidsHash[uid] = i;
+                getFriends();
             })(i);
         }
     },
