@@ -372,7 +372,7 @@ App.prototype = {
     
     updateProgress: function (progress) {
         if (progress.increaseBy) {
-            this.progress += increaseBy;
+            this.progress += progress.increaseBy;
         }
         if (progress.value) {
             this.progress = progress.value;
