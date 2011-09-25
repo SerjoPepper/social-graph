@@ -61,7 +61,7 @@ GraphRenderer.prototype = {
         });
         
         this.sys.eachEdge(function (edge, pt1, pt2) {
-            var name = edge.src.name + ',' + edge.target.name;
+            var name = edge.source.name + ',' + edge.target.name;
             if (!_this.drawedEdges[name]) {
                 var line = document.createElement('line');
                 line.className = 'graph-edge inited';
