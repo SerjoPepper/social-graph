@@ -69,7 +69,7 @@ GraphRenderer.prototype = {
                 _this.svgElement.appendChild(line);
                 _this.drawedEdges[name] = line;
             }
-            _this.setEdgePos(!_this.drawedEdges[name], pt1, pt2);
+            _this.setEdgePos(_this.drawedEdges[name], pt1, pt2);
         });
     },
     
