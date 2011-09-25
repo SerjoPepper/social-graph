@@ -187,6 +187,8 @@ App.prototype = {
                 var d = data.response.split(','),
                     md5 = d[0],
                     encodedRelationsLength = d[1];
+                    alert(_this.friendsMD5);
+                    alert(md5);
                 if (md5 == _this.friendsMD5) {
                     _this.computeRelationsFromStorage(encodedRelationsLength); // если всё ок берем связи друзей из стораджа
                 } else {
