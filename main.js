@@ -31,8 +31,8 @@ function GraphRenderer (elements) {
 GraphRenderer.prototype = {
     init: function (system) {
 		this.sys = system;
-		particleSystem.screenSize($(this.wrapperNode).width(), $(this.wrapperNode).height());
-		particleSystem.screenPadding(10);
+		this.sys.screenSize($(this.wrapperElement).width(), $(this.wrapperElement).height());
+		this.sys.screenPadding(10);
     },
     
     clearEdges: function () {
@@ -187,8 +187,6 @@ App.prototype = {
                 var d = data.response.split(','),
                     md5 = d[0],
                     encodedRelationsLength = d[1];
-                    alert(_this.friendsMD5);
-                    alert(md5);
                 if (md5 == _this.friendsMD5) {
                     _this.computeRelationsFromStorage(encodedRelationsLength); // если всё ок берем связи друзей из стораджа
                 } else {
