@@ -16,7 +16,7 @@ function View () {
 }
 
 View.prototype = {
-    updateProgress: function (progress) {
+    renderProgress: function (progress) {
         
     }
 };
