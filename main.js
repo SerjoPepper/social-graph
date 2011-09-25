@@ -377,7 +377,6 @@ App.prototype = {
         if (progress.value) {
             this.progress = progress.value;
         }
-        this.progress = newProgress;
         if (this.progress > 1) {
             this.progress = 1;
         }
