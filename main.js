@@ -142,8 +142,8 @@ GraphRenderer.prototype = {
     },
     
     prepareCanvas: function () {
-        this.restore();
-        this.save();
+        this.canvas.restore();
+        this.canvas.save();
         this.canvas.clearRect(0, 0, this.canvasSize.width, this.canvasSize.height);
         this.canvas.translate(-this.screenSize.width/2 + this.canvasSize.width/2, -this.screenSize.height/2 + this.canvasSize.height/2);
     }
