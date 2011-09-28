@@ -346,7 +346,7 @@ App.prototype = {
                             if (data.error) {
                                 if (data.error.error_code == 6 || data.error.error_code == 1) {
                                    setTimeout(getFriends, _this.requestDelay);
-                                } else if (data.error.error_code == 15) {
+                                } else {
                                     if (++k == il) {
                                         _this.saveEncoded(uidsHash);
                                         _this.updateProgress({ value: 1 });
