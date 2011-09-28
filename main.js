@@ -22,7 +22,7 @@ View.prototype = {
 
 function GraphRenderer (elements) {
     this.canvasElement = elements.canvas;
-    this.canvas = this.canvasElement.get(0).getContext('2d');
+    this.canvas = this.canvasElement[0].getContext('2d');
     this.size = {
         width: this.canvasElement.width(),
         height: this.canvasElement.height()
