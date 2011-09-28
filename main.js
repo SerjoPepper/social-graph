@@ -316,17 +316,16 @@ App.prototype = {
                     this.relations[srcUid] = {};
                 }
                 this.relations[srcUid][targetUid] = true;
-                setTimeout(function () {
-                    edges.push({ src: srcUid, target: targetUid });
-                }, this.edgeAppearDelay);
+                edges.push({ src: srcUid, target: targetUid });
             }
         }
         return edges;
     },
     
     addEdges: function (edges) {
+        var _this = this;
         for (var i = 0, il = edges.length; i < il; i++) {
-            this.graph.addEdge(edges[i]);
+            setTimeout(function () { _this.graph.addEdge(edges[i]); }, this.edgeAppearDelay);
         }
     },
     
