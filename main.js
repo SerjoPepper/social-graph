@@ -217,7 +217,7 @@ App.prototype = {
             },
             function (data) {
                 if (data.error) {
-                    if (data.error == 6 || data.error == 1) {
+                    if (data.error.error_code == 6 || data.error.error_code == 1) {
                         setTimeout(function () { _this.getMyFriends(); }, _this.requestDelay);
                     }
                     return;
@@ -251,7 +251,7 @@ App.prototype = {
             },
             function (data) {
                 if (data.error) {
-                    if (data.error == 10) {
+                    if (data.error.error_code == 10) {
                         setTimeout(function () { _this.setRelations(); }, _this.requestDelay);
                     }
                     return;
@@ -283,7 +283,7 @@ App.prototype = {
                         },
                         function (data) {
                             if (data.error) {
-                                if (data.error == 10) {
+                                if (data.error.error_code == 10) {
                                     setTimeout(get, _this.requestDelay);
                                 }
                                 return;
@@ -344,7 +344,7 @@ App.prototype = {
                         },
                         function (data) {
                             if (data.error) {
-                                if (data.error == 6 || data.error == 1) {
+                                if (data.error.error_code == 6 || data.error.error_code == 1) {
                                    setTimeout(getFriends, _this.requestDelay);
                                 }
                                 return;
@@ -414,7 +414,7 @@ App.prototype = {
                             value: encodedRelations[i]
                         },
                         function (data) {
-                            if (data.error && data.error == 10) {
+                            if (data.error && data.error.error_code == 10) {
                                 setTimeout(set, _this.requestDelay);
                                 return;
                             }
@@ -435,7 +435,7 @@ App.prototype = {
                 value: friendsMD5 + ',' + relationsLength
             },
             function (data) {
-                if (data.error && data.error == 10) {
+                if (data.error && data.error.error_code == 10) {
                     _this.saveEncodedRelationsMeta(friendsMD5, relationsLength);
                     return;
                 }
