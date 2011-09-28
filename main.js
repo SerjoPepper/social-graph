@@ -195,7 +195,7 @@ function App (domElements) {
     this.graph;
     this.progress = 0; //loading progress
     this.view = new View();
-    this.requestDelay = 350; // задержка м/у запросами
+    this.requestDelay = 400; // задержка м/у запросами
 }
 
 App.prototype = {
@@ -404,6 +404,7 @@ App.prototype = {
     },
     
     saveEncodedRelations: function (encodedRelations) {
+        var _this = this;
         for (var i = 0, il = encodedRelations.length; i < il; i++) {
             (function (i) {
                 var set = function () {
@@ -436,7 +437,7 @@ App.prototype = {
             },
             function (data) {
                 if (data.error && data.error.error_code == 10) {
-                    _this.saveEncodedRelationsMeta(friendsMD5, relationsLength);
+                    setTimeout(function () { _this.saveEncodedRelationsMeta(friendsMD5, relationsLength); }, _this.requestDelay);
                     return;
                 }
             }
