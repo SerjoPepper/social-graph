@@ -47,7 +47,7 @@ GraphRenderer.prototype = {
     redrawEdges: function () {
         var canvas = this.canvas;
         canvas.lineWidth = 1;
-        canvas.strokeStyle = '#bbb';
+        canvas.strokeStyle = '#ddd';
         canvas.beginPath();
         this.sys.eachEdge(function (edge, pt1, pt2) {
             canvas.moveTo(pt1.x, pt1.y);
