@@ -387,11 +387,12 @@ App.prototype = {
     saveEncoded: function (uidsHash) {
         var encodedRelations = [],
             maxLength = 4096,
-            tempStr = '';
+            tempStr = '',
+            s = '';
         for (var uid in this.relations) {
             var friends = this.relations[uid],
-                encodedRelationStr = uidsHash[uid] + '=';
-                var friendsIndexes = [];
+                encodedRelationStr = uidsHash[uid] + '=',
+                friendsIndexes = [];
             for (var friendUid in friends) {
                 friendsIndexes.push(uidsHash[friendUid]);
             }
@@ -399,12 +400,15 @@ App.prototype = {
             if (tempStr != '') {
                 tempStr += '|';
             }
-            tempStr += encodedRelationStr;
-            if (tempStr.length >= maxLength) {
+            s = tempStr + encodedRelationStr;
+            if (s.length > maxLength) {
                 encodedRelations.push(tempStr);
-                tempStr = '';
+                tempStr = encodedRelationStr;
+            } else {
+                tempStr = s;
             }
         }
+        encodedRelations.push(tempStr);
         
         this.saveEncodedRelations(encodedRelations);
         this.saveEncodedRelationsMeta(this.friendsMD5, encodedRelations.length);
