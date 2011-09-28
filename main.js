@@ -47,7 +47,7 @@ GraphRenderer.prototype = {
     redrawEdges: function () {
         var canvas = this.canvas;
         canvas.lineWidth = 1;
-        canvas.strokeStyle = '#888';
+        canvas.strokeStyle = '#bbb';
         canvas.beginPath();
         this.sys.eachEdge(function (edge, pt1, pt2) {
             canvas.moveTo(pt1.x, pt1.y);
@@ -59,7 +59,7 @@ GraphRenderer.prototype = {
 
     redrawNodes: function () {
         var canvas = this.canvas;
-        canvas.lineWidth = 3;
+        canvas.lineWidth = 2;
         this.sys.eachNode(function (node, pt) {
             var img = new Image(),
                 x = pt.x - 10,
