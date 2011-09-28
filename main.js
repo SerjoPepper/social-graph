@@ -62,10 +62,10 @@ GraphRenderer.prototype = {
             img.src = node.data.photo;
             canvas.save();
             canvas.beginPath();
-            canvas.arc(pt.x, pt.y, 40, 0, 2 * Math.PI, true);
+            canvas.arc(pt.x, pt.y, 20, 0, 2 * Math.PI, true);
             canvas.closePath();
             canvas.clip();
-            canvas.drawImage(img, pt.x - 20, pt.y - 20);
+            canvas.drawImage(img, pt.x - 10, pt.y - 10, 20, 20);
             canvas.restore();
             /*
             if (!_this.drawedNodes[node.name]) {
