@@ -2,8 +2,7 @@
 $(function () {
 VK.init(function() {
     var elements = {
-            wrapper: document.getElementById('graph-wrapper'),
-            svg: document.getElementById('graph-svg')
+            canvas: $('#graph-wrapper')
         },
         app = new App(elements);
     app.init();
@@ -22,28 +21,79 @@ View.prototype = {
 };
 
 function GraphRenderer (elements) {
-    this.wrapperElement = elements.wrapper;
-    this.svgElement = elements.svg;
-    this.drawedNodes = {};
-    this.drawedEdges = {};
+    this.canvasElement = elements.canvas;
+    this.canvas = this.canvasElement.get(0).getContext('2d');
+    this.size = {
+        width: this.canvasElement.width(),
+        height: this.canvasElement.height()
+    }
 }
 
 GraphRenderer.prototype = {
     init: function (system) {
-		this.sys = system;
-		this.sys.screenSize($(this.wrapperElement).width(), $(this.wrapperElement).height());
-		this.sys.screenPadding(10);
+        this.sys = system;
+        this.sys.screenSize(this.size.width, this.size.height);
+        this.sys.screenPadding(10);
     },
-    
+
     clearEdges: function () {
         for (var k in this.drawedEdges) {
             this.svgElement.removeChild(this.drawedEdges[k]);
         }
         this.drawedEdges = {};
     },
-    
+
+    redrawEdges: function () {
+        var canvas = this.canvas;
+        canvas.beginPath();
+        this.sys.eachEdge(function (edge, pt1, pt2) {
+            canvas.moveTo(pt1.x, pt1.y);
+            canvas.lineTo(pt2.x, pt2.y);
+        });
+        canvas.closePath();
+        canvas.stroke();
+    },
+
+    redrawNodes: function () {
+        var canvas = this.canvas;
+        this.sys.eachNode(function (node, pt) {
+            var img = new Image();
+            img.src = node.data.photo;
+            canvas.save();
+            canvas.beginPath();
+            canvas.arc(pt.x, pt.y, 40, 0, 2 * Math.PI, true);
+            canvas.clip();
+            canvas.closePath();
+            canvas.drawImage(img, pt.x - 20, pt.y - 20);
+            canvas.restore();
+            /*
+            if (!_this.drawedNodes[node.name]) {
+                var a = document.createElement('a'),
+                    img = new Image();
+                a.href = 'http://vkontakte.ru/id' + node.name;
+                a.title = node.data.name;
+                a.target = 'blank';
+                img.src = node.data.photo;
+                a.appendChild(img);
+                a.className = 'graph-point inited';
+                setTimeout(function () { a.className = 'graph-point'; }, 1);
+                _this.wrapperElement.appendChild(a);
+                _this.drawedNodes[node.name] = a;
+            }
+            _this.setPointPos(_this.drawedNodes[node.name], pt);
+            */
+        });
+    },
+
     redraw: function () {
         var _this = this;
+        this.canvas.clearRect(0, 0, this.size.width, this.size.height);
+        this.canvas.save();
+        this.canvas.translate(0, 0);
+
+        this.redrawEdges();
+        this.redrawNodes();
+        this.canvas.restore();/*
         this.sys.eachNode(function (node, pt) {
             if (!_this.drawedNodes[node.name]) {
                 var a = document.createElement('a'),
@@ -71,7 +121,7 @@ GraphRenderer.prototype = {
                 _this.drawedEdges[name] = line;
             }
             _this.setEdgePos(_this.drawedEdges[name], pt1, pt2);
-        });
+        });*/
     },
     
     setPointPos: function (element, pt) {
@@ -87,9 +137,9 @@ GraphRenderer.prototype = {
 };
 
 function Graph (elements) {
-	this.sys = arbor.ParticleSystem(1000); // создаём систему
-	this.sys.parameters({ gravity:true }); // гравитация вкл
-	this.sys.renderer = new GraphRenderer(elements); //начинаем рисовать в выбраной области
+    this.sys = arbor.ParticleSystem(1000); // создаём систему
+    this.sys.parameters({ gravity:true }); // гравитация вкл
+    this.sys.renderer = new GraphRenderer(elements); //начинаем рисовать в выбраной области
 }
 
 Graph.prototype = {
@@ -115,7 +165,6 @@ Graph.prototype = {
         sys.eachEdge(function (edge, pt1, pt2) {
             sys.pruneEdge(edge);
         });
-        this.sys.renderer.clearEdges();
     }
 };
 
@@ -412,5 +461,5 @@ var cssTranslate = (function () {
     return function (element, pt) {
         element.style.left = pt.x + 'px';
         element.style.top = pt.y + 'px';
-    };	
+    };
 })();
