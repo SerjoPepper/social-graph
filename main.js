@@ -46,6 +46,8 @@ GraphRenderer.prototype = {
 
     redrawEdges: function () {
         var canvas = this.canvas;
+        canvas.lineWidth = 1;
+        canvas.strokeStyle = '#888';
         canvas.beginPath();
         this.sys.eachEdge(function (edge, pt1, pt2) {
             canvas.moveTo(pt1.x, pt1.y);
@@ -57,13 +59,13 @@ GraphRenderer.prototype = {
 
     redrawNodes: function () {
         var canvas = this.canvas;
-        
+        canvas.lineWidth = 3;
         this.sys.eachNode(function (node, pt) {
             var img = new Image(),
                 x = pt.x - 10,
                 y = pt.y - 10;
             img.src = node.data.photo;
-            canvas.strokeStyle = node.data.male ? '#44BCCC' : '#FF6FB8';
+            canvas.strokeStyle = node.data.male ? '#77C7CC' : '#FFAFE0';
             canvas.drawImage(img, x, y, 20, 20);
             canvas.strokeRect(x, y, 20, 20);
             /*
@@ -138,7 +140,6 @@ GraphRenderer.prototype = {
     setOptions: function (nodesLength) {
         this.nodesLength = nodesLength;
         this.screenSize = { width: 100 * Math.sqrt(nodesLength), height: 100 * Math.sqrt(nodesLength) };
-        this.canvas.lineWidth = 4;
         this.canvas.lineJoin = 'round';
     },
     
