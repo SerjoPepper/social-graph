@@ -20,13 +20,14 @@ View.prototype = {
     }
 };
 
-function GraphRenderer (elements) {
-    this.canvasElement = elements.canvas;
+function GraphRenderer (domElements, nodesLength) {
+    this.canvasElement = domElements.canvas;
     this.canvas = this.canvasElement.get(0).getContext('2d');
     this.canvasSize = {
         width: this.canvasElement.width(),
         height: this.canvasElement.height()
-    }
+    };
+    this.setOptions(nodesLength);
 }
 
 GraphRenderer.prototype = {
@@ -87,7 +88,7 @@ GraphRenderer.prototype = {
 
     redraw: function () {
         var _this = this;
-        this.canvas.clearRect(0, 0, this.canvasSize.width, this.canvasSize.height);
+        this.prepareCanvas();
         this.canvas.save();
         this.canvas.translate(0, 0);
 
@@ -135,18 +136,24 @@ GraphRenderer.prototype = {
         element.setAttribute('y2', pt2.y);
     },
     
-    setNodesLength: function (length) {
-        this.nodesLength = length;
-        this.screenSize = { width: 80 * Math.sqrt(length), height: 80 * Math.sqrt(length) };
+    setOptions: function (nodesLength) {
+        this.nodesLength = nodesLength;
+        this.screenSize = { width: 100 * Math.sqrt(nodesLength), height: 100 * Math.sqrt(nodesLength) };
         this.sys.screenSize(this.screenSize.width, this.screenSize.height);
+    },
+    
+    prepareCanvas: function () {
+        this.restore();
+        this.save();
+        this.canvas.clearRect(0, 0, this.canvasSize.width, this.canvasSize.height);
         this.canvas.translate(-this.screenSize.width/2 + this.canvasSize.width/2, -this.screenSize.height/2 + this.canvasSize.height/2);
     }
 };
 
-function Graph (elements) {
+function Graph (domElements, nodesLength) {
     this.sys = arbor.ParticleSystem(1000); // создаём систему
     this.sys.parameters({ gravity:true }); // гравитация вкл
-    this.sys.renderer = new GraphRenderer(elements); //начинаем рисовать в выбраной области
+    this.sys.renderer = new GraphRenderer(domElements, nodesLength); //начинаем рисовать в выбраной области
 }
 
 Graph.prototype = {
@@ -179,11 +186,12 @@ Graph.prototype = {
     }
 };
 
-function App (elements) {
+function App (domElements) {
+    this.domElements = domElements;
     this.friends = {};
     this.relations = {};
     this.uidFriends = [];
-    this.graph = new Graph(elements);
+    this.graph;
     this.progress = 0; //loading progress
     this.view = new View();
 }
@@ -214,7 +222,7 @@ App.prototype = {
                 }
                 
                 var friends = data.response;
-                _this.graph.setNodesLength(friends.length);
+                _this.graph = new Graph(_this.domElements, friends.length);
                 for (var i = 0, il = friends.length; i < il; i++) {
                     var friend = friends[i];
                     _this.uidFriends.push(friend.uid);
