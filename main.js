@@ -33,7 +33,7 @@ function GraphRenderer (domElements, nodesLength) {
 GraphRenderer.prototype = {
     init: function (system) {
         this.sys = system;
-        this.sys.screenSize(this.canvasSize.width, this.canvasSize.height);
+        this.sys.screenSize(this.screenSize.width, this.screenSize.height);
         this.sys.screenPadding(10);
     },
 
@@ -139,7 +139,6 @@ GraphRenderer.prototype = {
     setOptions: function (nodesLength) {
         this.nodesLength = nodesLength;
         this.screenSize = { width: 100 * Math.sqrt(nodesLength), height: 100 * Math.sqrt(nodesLength) };
-        this.sys.screenSize(this.screenSize.width, this.screenSize.height);
     },
     
     prepareCanvas: function () {
