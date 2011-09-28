@@ -397,10 +397,8 @@ App.prototype = {
                 friendsIndexes.push(uidsHash[friendUid]);
             }
             encodedRelationStr += friendsIndexes.join(',');
-            if (tempStr != '') {
-                tempStr += '|';
-            }
-            s = tempStr + encodedRelationStr;
+            
+            s = tempStr + (tempStr != '' ? '|' : '') + encodedRelationStr;
             if (s.length > maxLength) {
                 encodedRelations.push(tempStr);
                 tempStr = encodedRelationStr;
