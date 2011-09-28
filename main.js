@@ -152,8 +152,7 @@ GraphRenderer.prototype = {
 };
 
 function Graph (domElements, nodesLength) {
-    this.sys = arbor.ParticleSystem(1000); // создаём систему
-    this.sys.parameters({ gravity:true }); // гравитация вкл
+    this.sys = arbor.ParticleSystem(400, 50, 0.5, false, 30, 0.02, 0.9); // создаём систему
     this.sys.renderer = new GraphRenderer(domElements, nodesLength); //начинаем рисовать в выбраной области
 }
 
