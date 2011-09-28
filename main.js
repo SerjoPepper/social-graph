@@ -325,7 +325,9 @@ App.prototype = {
     addEdges: function (edges) {
         var _this = this;
         for (var i = 0, il = edges.length; i < il; i++) {
+            (function (i) {
             setTimeout(function () { _this.graph.addEdge(edges[i]); }, this.edgeAppearDelay);
+            })(i);
         }
     },
     
