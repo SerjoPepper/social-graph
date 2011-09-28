@@ -23,7 +23,7 @@ View.prototype = {
 function GraphRenderer (elements) {
     this.canvasElement = elements.canvas;
     this.canvas = this.canvasElement.get(0).getContext('2d');
-    this.size = {
+    this.canvasSize = {
         width: this.canvasElement.width(),
         height: this.canvasElement.height()
     }
@@ -32,7 +32,7 @@ function GraphRenderer (elements) {
 GraphRenderer.prototype = {
     init: function (system) {
         this.sys = system;
-        this.sys.screenSize(this.size.width, this.size.height);
+        this.sys.screenSize(this.canvasSize.width, this.canvasSize.height);
         this.sys.screenPadding(10);
     },
 
@@ -62,9 +62,9 @@ GraphRenderer.prototype = {
             canvas.save();
             canvas.beginPath();
             canvas.arc(pt.x, pt.y, 40, 0, 2 * Math.PI, true);
+            canvas.drawImage(img, pt.x - 20, pt.y - 20);
             canvas.clip();
             canvas.closePath();
-            canvas.drawImage(img, pt.x - 20, pt.y - 20);
             canvas.restore();
             /*
             if (!_this.drawedNodes[node.name]) {
@@ -87,7 +87,7 @@ GraphRenderer.prototype = {
 
     redraw: function () {
         var _this = this;
-        this.canvas.clearRect(0, 0, this.size.width, this.size.height);
+        this.canvas.clearRect(0, 0, this.canvasSize.width, this.canvasSize.height);
         this.canvas.save();
         this.canvas.translate(0, 0);
 
@@ -133,6 +133,13 @@ GraphRenderer.prototype = {
         element.setAttribute('y1', pt1.y);
         element.setAttribute('x2', pt2.x);
         element.setAttribute('y2', pt2.y);
+    },
+    
+    setNodesLength: function (length) {
+        this.nodesLength = length;
+        this.screenSize = { width: 80 * Math.sqrt(length), height: 80 * Math.sqrt(length) };
+        this.sys.screenSize(this.screenSize.width, this.screenSize.height);
+        this.canvas.translate(-this.screenSize.width/2 + this.canvasSize.width/2, -this.screenSize.height/2 + this.canvasSize.height/2);
     }
 };
 
@@ -165,6 +172,10 @@ Graph.prototype = {
         sys.eachEdge(function (edge, pt1, pt2) {
             sys.pruneEdge(edge);
         });
+    },
+    
+    setNodesLength: function (length) {
+        this.sys.renderer.setNodesLength(length);
     }
 };
 
@@ -203,6 +214,7 @@ App.prototype = {
                 }
                 
                 var friends = data.response;
+                _this.graph.setNodesLength(friends.length);
                 for (var i = 0, il = friends.length; i < il; i++) {
                     var friend = friends[i];
                     _this.uidFriends.push(friend.uid);
