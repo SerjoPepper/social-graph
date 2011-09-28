@@ -47,7 +47,7 @@ GraphRenderer.prototype = {
     redrawEdges: function () {
         var canvas = this.canvas;
         canvas.lineWidth = 1;
-        canvas.strokeStyle = '#ddd';
+        canvas.strokeStyle = '#bbb';
         canvas.beginPath();
         this.sys.eachEdge(function (edge, pt1, pt2) {
             canvas.moveTo(pt1.x, pt1.y);
@@ -139,7 +139,7 @@ GraphRenderer.prototype = {
     
     setOptions: function (nodesLength) {
         this.nodesLength = nodesLength;
-        this.screenSize = { width: 100 * Math.sqrt(nodesLength), height: 100 * Math.sqrt(nodesLength) };
+        this.screenSize = { width: 200 * Math.sqrt(nodesLength), height: 200 * Math.sqrt(nodesLength) };
         this.canvas.lineJoin = 'round';
     },
     
