@@ -195,6 +195,7 @@ function App (domElements) {
     this.graph;
     this.progress = 0; //loading progress
     this.view = new View();
+    this.requestDelay = 350; // задержка м/у запросами
 }
 
 App.prototype = {
@@ -217,7 +218,7 @@ App.prototype = {
             function (data) {
                 if (data.error) {
                     if (data.error == 6 || data.error == 1) {
-                        _this.getMyFriends();
+                        setTimeout(function () { _this.getMyFriends(); }, _this.requestDelay);
                     }
                     return;
                 }
@@ -251,7 +252,7 @@ App.prototype = {
             function (data) {
                 if (data.error) {
                     if (data.error == 10) {
-                        _this.setRelations();
+                        setTimeout(function () { _this.setRelations(); }, _this.requestDelay);
                     }
                     return;
                 }
@@ -274,7 +275,7 @@ App.prototype = {
             increaseBy = 1 / encodedRelationsLength;
         for (var i = 0, il = encodedRelationsLength; i < il; i++) {
             (function (i) {
-                var get = function (i) {                
+                var get = function () {                
                     VK.api(
                         'storage.get',
                         {
@@ -283,7 +284,7 @@ App.prototype = {
                         function (data) {
                             if (data.error) {
                                 if (data.error == 10) {
-                                    get(i);
+                                    setTimeout(get, _this.requestDelay);
                                 }
                                 return;
                             }
@@ -293,7 +294,7 @@ App.prototype = {
                         }
                     );
                 }
-                get(i);
+                setTimeout(get, i * _this.requestDelay);
             })(i);
         }
     },
@@ -333,8 +334,8 @@ App.prototype = {
             increaseBy = 1 / this.uidFriends.length;
         for (var i = 0, k = 0, il = this.uidFriends.length; i < il; i++) {
             (function (i) {
-                var uid = _this.uidFriends[i],
-                    getFriends = function () {
+                var uid = _this.uidFriends[i];
+                    var getFriends = function () {
                     VK.api(
                         'friends.get',
                         {
@@ -344,7 +345,7 @@ App.prototype = {
                         function (data) {
                             if (data.error) {
                                 if (data.error == 6 || data.error == 1) {
-                                   getFriends();
+                                   setTimeout(getFriends, _this.requestDelay);
                                 }
                                 return;
                             }
@@ -371,7 +372,7 @@ App.prototype = {
                     );
                 }
                 uidsHash[uid] = i;
-                getFriends();
+                setTimeout(getFriends, i * _this.requestDelay);
             })(i);
         }
     },
@@ -405,7 +406,7 @@ App.prototype = {
     saveEncodedRelations: function (encodedRelations) {
         for (var i = 0, il = encodedRelations.length; i < il; i++) {
             (function (i) {
-                var set = function (i) {
+                var set = function () {
                     VK.api(
                         'storage.set',
                         {
@@ -414,13 +415,13 @@ App.prototype = {
                         },
                         function (data) {
                             if (data.error && data.error == 10) {
-                                set(i);
+                                setTimeout(set, _this.requestDelay);
                                 return;
                             }
                         }
                     );
                 };
-                set(i);
+                setTimeout(set, i * _this.requestDelay)
             })(i);
         }
     },
