@@ -57,16 +57,15 @@ GraphRenderer.prototype = {
 
     redrawNodes: function () {
         var canvas = this.canvas;
+        
         this.sys.eachNode(function (node, pt) {
-            var img = new Image();
+            var img = new Image(),
+                x = pt.x - 10,
+                y = pt.y - 10;
             img.src = node.data.photo;
-            canvas.save();
-            canvas.beginPath();
-            canvas.arc(pt.x, pt.y, 20, 0, 2 * Math.PI, true);
-            canvas.closePath();
-            canvas.clip();
-            canvas.drawImage(img, pt.x - 10, pt.y - 10, 20, 20);
-            canvas.restore();
+            canvas.strokeStyle = node.data.male ? '#44BCCC' : '#FF6FB8';
+            canvas.drawImage(img, x, y, 20, 20);
+            canvas.strokeRect(x, y, 20, 20);
             /*
             if (!_this.drawedNodes[node.name]) {
                 var a = document.createElement('a'),
@@ -139,6 +138,8 @@ GraphRenderer.prototype = {
     setOptions: function (nodesLength) {
         this.nodesLength = nodesLength;
         this.screenSize = { width: 100 * Math.sqrt(nodesLength), height: 100 * Math.sqrt(nodesLength) };
+        this.canvas.lineWidth = 4;
+        this.canvas.lineJoin = 'round';
     },
     
     prepareCanvas: function () {
