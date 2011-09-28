@@ -93,8 +93,8 @@ GraphRenderer.prototype = {
         this.canvas.save();
         this.canvas.translate(0, 0);
 
-        this.redrawEdges();
-        this.redrawNodes();
+        //this.redrawEdges();
+        //this.redrawNodes();
         this.canvas.restore();/*
         this.sys.eachNode(function (node, pt) {
             if (!_this.drawedNodes[node.name]) {
