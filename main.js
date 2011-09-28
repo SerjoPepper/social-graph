@@ -196,6 +196,7 @@ function App (domElements) {
     this.progress = 0; //loading progress
     this.view = new View();
     this.requestDelay = 400; // задержка м/у запросами
+    this.edgeAppearDelay = 300; // задержка м/у появлениями ребер
 }
 
 App.prototype = {
@@ -315,7 +316,9 @@ App.prototype = {
                     this.relations[srcUid] = {};
                 }
                 this.relations[srcUid][targetUid] = true;
-                edges.push({ src: srcUid, target: targetUid });
+                setTimeout(function () {
+                    edges.push({ src: srcUid, target: targetUid });
+                }, this.edgeAppearDelay);
             }
         }
         return edges;
