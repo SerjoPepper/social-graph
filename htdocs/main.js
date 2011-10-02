@@ -1,10 +1,7 @@
 (function ($) {
 $(function () {
 VK.init(function() {
-    var elements = {
-            canvas: $('#graph-canvas')
-        },
-        app = new App(elements);
+    var app = new App();
     app.init();
 });
 });
@@ -20,192 +17,203 @@ View.prototype = {
     }
 };
 
-function GraphRenderer (domElements, nodesLength) {
-    this.canvasElement = domElements.canvas;
-    this.canvas = this.canvasElement.get(0).getContext('2d');
-    this.canvasSize = {
-        width: this.canvasElement.width(),
-        height: this.canvasElement.height()
-    };
-    this.setOptions(nodesLength);
-}
-
-GraphRenderer.prototype = {
-    init: function (system) {
-        this.sys = system;
-        this.sys.screenSize(this.screenSize.width, this.screenSize.height);
-        this.sys.screenPadding(10);
-    },
-
-    clearEdges: function () {
-        for (var k in this.drawedEdges) {
-            this.svgElement.removeChild(this.drawedEdges[k]);
-        }
-        this.drawedEdges = {};
-    },
-
-    redrawEdges: function () {
-        var canvas = this.canvas;
-        canvas.lineWidth = 1;
-        canvas.strokeStyle = '#bbb';
-        canvas.beginPath();
-        this.sys.eachEdge(function (edge, pt1, pt2) {
-            canvas.moveTo(pt1.x, pt1.y);
-            canvas.lineTo(pt2.x, pt2.y);
-        });
-        canvas.closePath();
-        canvas.stroke();
-    },
-
-    redrawNodes: function () {
-        var canvas = this.canvas;
-        canvas.lineWidth = 2;
-        this.sys.eachNode(function (node, pt) {
-            var img = new Image(),
-                x = pt.x - 10,
-                y = pt.y - 10;
-            img.src = node.data.photo;
-            canvas.strokeStyle = node.data.male ? '#77C7CC' : '#FFAFE0';
-            canvas.drawImage(img, x, y, 20, 20);
-            canvas.strokeRect(x, y, 20, 20);
-            /*
-            if (!_this.drawedNodes[node.name]) {
-                var a = document.createElement('a'),
-                    img = new Image();
-                a.href = 'http://vkontakte.ru/id' + node.name;
-                a.title = node.data.name;
-                a.target = 'blank';
-                img.src = node.data.photo;
-                a.appendChild(img);
-                a.className = 'graph-point inited';
-                setTimeout(function () { a.className = 'graph-point'; }, 1);
-                _this.wrapperElement.appendChild(a);
-                _this.drawedNodes[node.name] = a;
-            }
-            _this.setPointPos(_this.drawedNodes[node.name], pt);
-            */
-        });
-    },
-
-    redraw: function () {
-        var _this = this;
-        this.prepareCanvas();
-        this.canvas.save();
-        this.canvas.translate(0, 0);
-
-        this.redrawEdges();
-        this.redrawNodes();
-        this.canvas.restore();/*
-        this.sys.eachNode(function (node, pt) {
-            if (!_this.drawedNodes[node.name]) {
-                var a = document.createElement('a'),
-                    img = new Image();
-                a.href = 'http://vkontakte.ru/id' + node.name;
-                a.title = node.data.name;
-                a.target = 'blank';
-                img.src = node.data.photo;
-                a.appendChild(img);
-                a.className = 'graph-point inited';
-                setTimeout(function () { a.className = 'graph-point'; }, 1);
-                _this.wrapperElement.appendChild(a);
-                _this.drawedNodes[node.name] = a;
-            }
-            _this.setPointPos(_this.drawedNodes[node.name], pt);
-        });
+function Graph (nodes) {
+    this.tickId = 0;
+    this.nodeSize = { w: 20, h: 20, hw: 10, hh: 10 };
+    this.screenSize = { width: 200 * Math.sqrt(nodes.length), height: 200 * Math.sqrt(nodes.length) };
+    
+    this.svg = d3.select("#graph-wrapper").append("svg:svg")
+        .attr("width", $('#graph-wrapper').width())
+        .attr("height", $('#graph-wrapper').height());
+    
+    var svgNode = this.svg.node(),
+        g = this.svg.append('svg:g'),
+        gNode = g.node(),
+        _this = this;
         
-        this.sys.eachEdge(function (edge, pt1, pt2) {
-            var name = edge.source.name + ',' + edge.target.name;
-            if (!_this.drawedEdges[name]) {
-                var line = document.createElement('line');
-                line.className = 'graph-edge inited';
-                setTimeout(function () { line.className = 'graph-edge'; }, 1);
-                _this.svgElement.appendChild(line);
-                _this.drawedEdges[name] = line;
+    gNode.lastX = 0;
+    gNode.lastY = 0;
+    
+    $(svgNode)
+        .mousedown(function (e) {
+            console.log(e.target)
+            if (e.target === svgNode) {
+                this.drugging = true;
+                this.startPageX = e.pageX;
+                this.startPageY = e.pageY;
             }
-            _this.setEdgePos(_this.drawedEdges[name], pt1, pt2);
-        });*/
-    },
+        });
+    $(document)
+        .mouseup(function (e) {
+            if (svgNode.drugging) {
+                gNode.lastX = gNode.lastX + e.pageX - svgNode.startPageX;
+                gNode.lastY = gNode.lastY + e.pageY - svgNode.startPageY;
+                svgNode.drugging = false;
+            }
+        })
+        .mousemove(function (e) {
+        if (svgNode.drugging) {
+            gNode.setAttribute('transform', 'translate(' + (gNode.lastX + e.pageX - svgNode.startPageX) +', ' + (gNode.lastY + e.pageY - svgNode.startPageY) +')');
+        }
+    });
     
-    setPointPos: function (element, pt) {
-        cssTranslate(element, pt);
-    },
+    this.linesWrapper = g.append('svg:g').attr('class', 'lines');
+    this.nodesWrapper = g.append('svg:g').attr('class', 'nodes');
+        
+    this.nodes = nodes;
+    this.links = [];
+    this.force = d3.layout.force()
+        .nodes(this.nodes)
+        .links(this.links)
+        .linkDistance(80) // link distance
+        .linkStrength(0.5) // link strength
+        .friction(0.8) // friction coefficient
+        .charge(-220) // charge strength
+        .gravity(.1) // gravity strength
+        .theta(1) // accuracy of the charge interaction
+        .size([607, 500]) // layout size in x and y;
     
-    setEdgePos: function (element, pt1, pt2) {
-        element.setAttribute('x1', pt1.x);
-        element.setAttribute('y1', pt1.y);
-        element.setAttribute('x2', pt2.x);
-        element.setAttribute('y2', pt2.y);
-    },
-    
-    setOptions: function (nodesLength) {
-        this.nodesLength = nodesLength;
-        this.screenSize = { width: 200 * Math.sqrt(nodesLength), height: 200 * Math.sqrt(nodesLength) };
-        this.canvas.lineJoin = 'round';
-    },
-    
-    prepareCanvas: function () {
-        this.canvas.restore();
-        this.canvas.save();
-        this.canvas.clearRect(0, 0, this.canvasSize.width, this.canvasSize.height);
-        this.canvas.translate(-this.screenSize.width/2 + this.canvasSize.width/2, -this.screenSize.height/2 + this.canvasSize.height/2);
-    }
-};
+    this.svgNodes = this.nodesWrapper.selectAll('a.node')
+        .data(this.nodes)
+        .enter().append('svg:a')
+        .attr('class', 'node')
+        .attr('xlink:href', function (d) { return 'http://vkontakte.ru/id' + d.uid; })
+        .attr('xlink:title', function(d) { return d.name; })
+        .attr('target', 'blank')
+        .call(this.force.drag);
 
-function Graph (domElements, nodesLength) {
-    this.sys = arbor.ParticleSystem(400, 50, 0.5, false, 50, 0.02, 0.9); // создаём систему
-    this.sys.renderer = new GraphRenderer(domElements, nodesLength); //начинаем рисовать в выбраной области
+    //this.svgNodes.append('svg:title')
+    //    .text(function(d) { return d.name; });
+    
+    this.svgNodes.append('svg:image')
+        .attr('class', 'photo')
+        .attr('xlink:href', function (d) { return d.photo; })
+        .attr('x', -this.nodeSize.hw)
+        .attr('y', -this.nodeSize.hh)
+        .attr('width', this.nodeSize.h + 'px')
+        .attr('height', this.nodeSize.w + 'px');
+    
+    this.svgNodes.append('svg:rect')
+        .attr('class', function (d) { return d.sex + ' rect'; })
+        .attr('x', -this.nodeSize.hw)
+        .attr('y', -this.nodeSize.hh)
+        .attr('width', this.nodeSize.h + 'px')
+        .attr('height', this.nodeSize.w + 'px')
+        .attr('rx', 2 + 'px')
+        .attr('ry', 2 + 'px');
+        
+    this.svgNodes.on('mouseover', function (d, i) { _this.force.resume(); });
+    this.svgNodes.on('mouseout', function (d, i) { _this.force.resume(); });
+        
+    this.svgLinks;
+    
+    this.force.on('tick', function () { _this.onTick(); });
+    this.force.start();
 }
 
 Graph.prototype = {
-    addNodes: function (nodes) {
-        for (var k in nodes) {
-            this.sys.addNode(k, nodes[k]);
-        }
-    },
-    
     clearNodes: function () {
-        var sys = this.sys;
-        sys.eachNode(function (node, pt) {
-            sys.pruneNode(node);
+        this.nodes = [];
+    },
+    
+    addLink: function (link) {
+        this.links.push(link);
+        
+        
+        this.svgLines = this.linesWrapper.selectAll('line.link')
+            .data(this.links)
+            .enter().append('svg:line')
+            .attr('class', 'link');
+ 
+        this.drawLinks();
+        
+        this.force.start();
+    },
+    
+    clearLink: function () {
+        this.links = [];
+    },
+    
+    onTick: function () {
+        this.drawLinks();
+        this.svgNodes.attr('transform', function(d) { return 'translate(' + d.x + ',' + d.y + ') scale(' + (d.fixed ? 1.8 : 1) +')'; })
+                     .attr('class', function (d) { return 'node' + (d.focused ? ' focused' : '') + (d.fixed ? ' fixed' : ''); });
+    },
+    
+    drawLinks: function () {
+        var id = this.tickId++;
+        
+        this.linesWrapper.selectAll('line.link').each(function (d, i) {
+            if (typeof d.source.index == 'undefined' || typeof d.target.index == 'undefined'){
+                return;
+            }
+            var sf = d.source.fixed,
+                tf = d.target.fixed;
+
+            if (!sf && !tf) {
+                this.setAttribute('class', 'link');
+                d.source.focused = (d.source.tickId == id);
+                d.target.focused = (d.target.tickId == id);
+                return;
+            }
+            
+            d.source.focused = true;
+            d.target.focused = true;
+            d.source.tickId = id;
+            d.target.tickId = id;
+            
+            this.setAttribute('class', 'link active');
+            this.setAttribute('x1', d.source.x);
+            this.setAttribute('y1', d.source.y);
+            this.setAttribute('x2', d.target.x);
+            this.setAttribute('y2', d.target.y);
         });
-    },
-    
-    addEdge: function (edge) {
-        this.sys.addEdge(edge.src, edge.target);
-    },
-    
-    clearEdges: function () {
-        var sys = this.sys;
-        sys.eachEdge(function (edge, pt1, pt2) {
-            sys.pruneEdge(edge);
-        });
-    },
-    
-    setNodesLength: function (length) {
-        this.sys.renderer.setNodesLength(length);
     }
 };
 
-function App (domElements) {
-    this.domElements = domElements;
-    this.friends = {};
+function App () {
     this.relations = {};
-    this.uidFriends = [];
+    this.friendsData = []; // данные о друзьях
+    this.uidFriendsArr = [];
+    this.uidFriendsHash = {};
     this.graph;
     this.progress = 0; //loading progress
     this.view = new View();
     this.requestDelay = 400; // задержка м/у запросами
-    this.edgeAppearDelay = 300; // задержка м/у появлениями ребер
+    this.edgeAppearDelay = 0; // задержка м/у появлениями ребер
+    this.myUid;
 }
 
 App.prototype = {
     init: function () {
-        this.getMyFriends();
+        this.getMe();
     },
     
     refresh: function () {
         this.graph.clearEdges();
         this.computeRelations();
+    },
+    
+    getMe: function () {
+        var _this = this;
+        VK.api('getUserInfoEx', function (data) {
+            if (!data.error) {
+                /*
+                var myself = data.response;
+                // сам себе любимый друг :)
+                _this.myUid = myself.user_id;
+                _this.uidFriendsArr.push(myself.user_id);
+                _this.uidFriendsHash[myself.user_id] = true;
+                _this.friendsData.push({
+                    uid: myself.user_id,
+                    name: myself.user_name,
+                    sex: myself.user_sex == 1 ? 'girl' : 'boy',
+                    photo: myself.user_photo
+                });*/
+                _this.getMyFriends();
+            }
+            
+        });
     },
     
     getMyFriends: function () {
@@ -224,20 +232,22 @@ App.prototype = {
                 }
                 
                 var friends = data.response;
-                _this.graph = new Graph(_this.domElements, friends.length);
                 for (var i = 0, il = friends.length; i < il; i++) {
                     var friend = friends[i];
-                    _this.uidFriends.push(friend.uid);
-                    _this.friends[friend.uid] = {
+                    _this.uidFriendsArr.push(friend.uid);
+                    _this.uidFriendsHash[friend.uid] = true
+                    _this.friendsData.push({
+                        uid: friend.uid,
                         name: friend.first_name + ' ' + friend.last_name,
-                        male: friend.sex == 1 ? false : true,
+                        sex: friend.sex == 1 ? 'girl' : 'boy',
                         photo: friend.photo
-                    };
+                    });
                 }
-                _this.uidFriends.sort();
-                _this.friendsMD5 = calcMD5(_this.uidFriends.join(''));
+                _this.friendsData.sort(function (a, b) { return (a.uid > b.uid) ? 1 : -1; });
+                _this.graph = new Graph(_this.friendsData);
+                _this.uidFriendsArr.sort(function (a, b) { return a > b ? 1 : -1; });
+                _this.friendsMD5 = calcMD5(_this.uidFriendsArr.join('+'));
                 _this.setRelations();
-                _this.graph.addNodes(_this.friends);
             }
         );
     },
@@ -289,7 +299,7 @@ App.prototype = {
                                 return;
                             }
                             var edges = _this.parseEncodedRelations(data.response);
-                            _this.addEdges(edges);
+                            _this.addLinks(edges);
                             _this.updateProgress({ increaseBy: increaseBy });
                         }
                     );
@@ -309,23 +319,26 @@ App.prototype = {
                 friendIndex = indexes[0],
                 friendsIndexes = indexes[1].split(',');
             for (var j = 0, jl = friendsIndexes.length; j < jl; j++) {
-                var srcUid = this.uidFriends[friendIndex],
-                    targetUid = this.uidFriends[friendsIndexes[j]];
+                var srcUid = this.uidFriendsArr[friendIndex],
+                    targetUid = this.uidFriendsArr[friendsIndexes[j]];
                 if (!this.relations[srcUid]) {
                     this.relations[srcUid] = {};
                 }
                 this.relations[srcUid][targetUid] = true;
-                edges.push({ src: srcUid, target: targetUid });
+                edges.push({
+                    source: this.uidFriendsArr.indexOf(srcUid),
+                    target: this.uidFriendsArr.indexOf(targetUid)
+                });
             }
         }
         return edges;
     },
     
-    addEdges: function (edges) {
+    addLinks: function (edges) {
         var _this = this;
         for (var i = 0, il = edges.length; i < il; i++) {
             (function (i) {
-            setTimeout(function () { _this.graph.addEdge(edges[i]); }, _this.edgeAppearDelay * i);
+                setTimeout(function () { _this.graph.addLink(edges[i]); }, _this.edgeAppearDelay * i);
             })(i);
         }
     },
@@ -334,11 +347,12 @@ App.prototype = {
     computeRelations: function () {
         var _this = this,
             uidsHash = {},
-            increaseBy = 1 / this.uidFriends.length;
-        for (var i = 0, k = 0, il = this.uidFriends.length; i < il; i++) {
+            increaseBy = 1 / this.uidFriendsArr.length;
+        for (var i = 0, k = 0, il = this.uidFriendsArr.length; i < il; i++) {
             (function (i) {
-                var uid = _this.uidFriends[i];
-                    var getFriends = function () {
+                var uid = _this.uidFriendsArr[i];
+                uidsHash[uid] = i;
+                var getFriends = function () {
                     VK.api(
                         'friends.get',
                         {
@@ -363,15 +377,18 @@ App.prototype = {
                                 edges = [];
                             for (var j = 0, jl = friends.length; j < jl; j++) {
                                 var friendUid = friends[j].uid;
-                                if (_this.friends[friendUid] && (!_this.relations[friendUid] || !_this.relations[friendUid][uid])) {
+                                if (_this.uidFriendsHash[friendUid] && (!_this.relations[friendUid] || !_this.relations[friendUid][uid])) {
                                     if (!_this.relations[uid]) {
                                         _this.relations[uid] = {};
                                     }
                                     _this.relations[uid][friendUid] = true;
-                                    edges.push({ src: uid, target: friendUid });
+                                    edges.push({
+                                        source: _this.uidFriendsArr.indexOf(uid),
+                                        target: _this.uidFriendsArr.indexOf(friendUid)
+                                    });
                                 }
                             }
-                            _this.addEdges(edges);
+                            _this.addLinks(edges);
                             if (++k == il) {
                                 _this.saveEncoded(uidsHash);
                                 _this.updateProgress({ value: 1 });
@@ -380,8 +397,7 @@ App.prototype = {
                             }
                         }
                     );
-                }
-                uidsHash[uid] = i;
+                };
                 setTimeout(getFriends, i * _this.requestDelay);
             })(i);
         }

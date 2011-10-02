@@ -1,0 +1,20 @@
+* {
+    margin: 0;
+    padding: 0;
+}
+
+body {
+   
+}
+#graph-wrapper { width: 607px; height: 500px;  background-color: #fff; margin-bottom: 10px; }
+#vk_like { margin-left: 230px; }
+.node { z-index: 1; }
+.node .photo {  }
+.node .rect { stroke-width: 2px; fill: none; }
+.node .boy.rect { stroke: #77C7CC; }
+.node .girl.rect { stroke: #FFAFE0; }
+.node.focused .boy.rect, .node.focused .girl.rect { stroke: #000; }
+.node.fixed .rect { stroke-width: 2px; }
+
+.link { stroke-width: 1px; stroke: none; }
+.link.active { stroke: #000; }
